@@ -1,0 +1,5 @@
+numpy>=1.19.0
+pygame>=2.0.0
+tensorflow>=2.0.0  # if you're using TensorFlow for the AI
+matplotlib>=3.0.0  # for any plotting needs
+pickle-mixin>=0.7.0  # for saving/loading models
