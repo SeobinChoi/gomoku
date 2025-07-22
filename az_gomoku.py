@@ -211,6 +211,7 @@ class ReplayBuffer:
         return random.sample(self.buffer, batch)
 
 class BufferDataset(Dataset):
+
     def __init__(self, samples:List[Transition]):
         self.samples = samples
     def __len__(self): return len(self.samples)
@@ -218,6 +219,14 @@ class BufferDataset(Dataset):
         s,pi,z = self.samples[idx]
         return s, pi, z
 
+def save_model(policy_net, episode, accuracy, is_best=False):
+    date_str = datetime.now().strftime('%Y%m%d')
+    filename = f"az9x9_{'best' if is_best else 'latest'}_ep{episode}_acc{int(accuracy*100)}_date{date_str}.pt"
+    save_dir = "logs/weights"
+    os.makedirs(save_dir, exist_ok=True)
+    path = os.path.join(save_dir, filename)
+    torch.save(policy_net.state_dict(), path)
+    print(f"✅ Model saved to: {path}")
 # ────────────────────────────────────
 # Training loop
 # ────────────────────────────────────
@@ -281,18 +290,7 @@ for iter in range(1, 101):  # max iterations
     print(f"Test vs random: {wins}/20")
     if wins >= 16:
         print("Early stop: agent good enough! ☕️")
-        break
-    
-def save_model(policy_net, episode, accuracy, is_best=False):
-    date_str = datetime.now().strftime('%Y%m%d')
-    filename = f"az9x9_{'best' if is_best else 'latest'}_ep{episode}_acc{int(accuracy*100)}_date{date_str}.pt"
-    save_dir = "logs/weights"
-    os.makedirs(save_dir, exist_ok=True)
-    path = os.path.join(save_dir, filename)
-    torch.save(policy_net.state_dict(), path)
-    print(f"✅ Model saved to: {path}")
+        accuracy = wins / 20  # 평가 승률
 
-# 마지막 줄쯤에 추가 — early stop 이후
-accuracy = wins / 20  # 평가 승률
-save_model(net, iter, accuracy, is_best=True)
+    
 
